@@ -70,7 +70,7 @@ public class FoxyAi : EnemyAI
             }
 
         }
-        SwingAttackHitClientRpc();
+        //SwingAttackHitClientRpc();
     }
     
     public override void DoAIInterval()
@@ -149,10 +149,10 @@ public class FoxyAi : EnemyAI
                     //Seen
                     SwitchToBehaviourClientRpc(4);
                     StartCoroutine(EyesManager(false));
+                    break;
                 }
                 
 
-                
                 
                 movingTowardsTargetPlayer = true;
                 SetDestinationToPosition(targetPlayer.transform.position);
@@ -189,8 +189,9 @@ public class FoxyAi : EnemyAI
                     creatureAnimator.speed = 0f;
                 }
 
-                if (agent.speed <= 0.1f)
+                if (agent.speed <= 0.5f)
                 {
+                    creatureAnimator.speed = 0.8F;
                     DoAnimationClientRpc("GotSeen");
                     StartCoroutine(EyesManager(false));
                     SwitchToBehaviourClientRpc(5);
