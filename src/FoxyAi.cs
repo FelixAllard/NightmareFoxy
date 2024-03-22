@@ -22,6 +22,7 @@ public class FoxyAi : EnemyAI
     public AudioClip idle2;
     public AudioClip deactivate;
     public AudioClip activate;
+    public BoxCollider foxyCollider;
     
     
     public Material foxEyes;
@@ -54,6 +55,7 @@ public class FoxyAi : EnemyAI
         agent.angularSpeed = 10000f;
         justSwitchedBehaviour = false;
         timer = 0;
+        foxyCollider.size = new Vector3(4.531483f, 21.24057f, 5.783448f);
     }
 
     public override void Update()
@@ -68,9 +70,7 @@ public class FoxyAi : EnemyAI
                 justSwitchedBehaviour = false;
                 
             }
-
         }
-        //SwingAttackHitClientRpc();
     }
     
     public override void DoAIInterval()
@@ -106,6 +106,7 @@ public class FoxyAi : EnemyAI
                 }
                 break;
             case (int)State.Standing:
+                foxyCollider.size = new Vector3(4.531483f, 21.24057f, 5.783448f);
                 creatureAnimator.speed = 1;
                 agent.isStopped = true;
                 agent.ResetPath();
@@ -117,6 +118,7 @@ public class FoxyAi : EnemyAI
                 }
                 break;
             case (int)State.ChargePose:
+                foxyCollider.size = new Vector3(4.531483f, 21.24057f, 5.783448f);
                 creatureAnimator.speed = 1;
                 agent.isStopped = true;
                 agent.ResetPath();
@@ -134,7 +136,7 @@ public class FoxyAi : EnemyAI
                 }
                 break;
             case (int)State.Running:
-                //TODO detect if we have ouy target player inside the faculty
+                foxyCollider.size = new Vector3(4.531483f, 21.24057f, 29.73968f);
                 if (targetPlayer == null || targetPlayer.isPlayerDead)
                 {
                     FetchTarget();
@@ -151,9 +153,6 @@ public class FoxyAi : EnemyAI
                     StartCoroutine(EyesManager(false));
                     break;
                 }
-                
-
-                
                 movingTowardsTargetPlayer = true;
                 SetDestinationToPosition(targetPlayer.transform.position);
                 agent.speed += 0.1f;
@@ -163,22 +162,18 @@ public class FoxyAi : EnemyAI
                 {
                     footSpeed.Play();
                 }
-                
                 break;
             case (int)State.Seen:
                 if (currentDuration < duration)
                 {
                     // Calculate the interpolation parameter based on the current duration
                     float t = currentDuration / duration;
-
                     // Calculate the new speed values using Mathf.Lerp
                     float newAgentSpeed = Mathf.Lerp(agent.speed, 0f, t);
                     float newAnimatorSpeed = Mathf.Lerp(creatureAnimator.speed, 0f, t);
-
                     // Apply the new speed values
                     agent.speed = newAgentSpeed;
                     creatureAnimator.speed = newAnimatorSpeed;
-                    
                     // Increment the current duration
                     currentDuration += Time.deltaTime;
                 }
@@ -200,6 +195,7 @@ public class FoxyAi : EnemyAI
                 
                 break;
             case (int)State.Jumping:
+                
                 
                 break;
             default:
@@ -268,8 +264,12 @@ public class FoxyAi : EnemyAI
     {
         Debug.Log("Yeah, collider works!");
         PlayerControllerB playerControllerB = MeetsStandardPlayerCollisionConditions(other);
+        //TODO detect if it is targetPlayer or other player!
         if ((int)State.Running == currentBehaviourStateIndex)
         {
+            Debug.Log("Agent has reached the destination!");
+            SwitchToBehaviourClientRpc(5);
+            StartCoroutine(FoxyKills(targetPlayer));
             playerControllerB.DamagePlayer(1);
         }
     }
