@@ -118,21 +118,28 @@ public class FoxyAi : EnemyAI
                 }
                 break;
             case (int)State.ChargePose:
+                if (!engine.isPlaying)
+                {
+                    engine.clip = idle1;
+                    engine.Play();
+                }
                 foxyCollider.size = new Vector3(4.531483f, 21.24057f, 5.783448f);
                 creatureAnimator.speed = 1;
                 agent.isStopped = true;
                 agent.ResetPath();
                 if (generatedNumber <= 3 && startedHowling != true)
                 {
-                    
+                    engine.clip = idle2;
                     //Animator do the running
                     creatureAnimator.speed = 0;
                     agent.speed = 0;
                     if (IsHost)
                     {
+                        engine.Play();
                         startedHowling = true;
                         StartCoroutine(CloseHunt(RandomNumberGenerator.GetInt32(3, 7)));
                     }
+                    
                 }
                 break;
             case (int)State.Running:
@@ -264,14 +271,20 @@ public class FoxyAi : EnemyAI
     {
         Debug.Log("Yeah, collider works!");
         PlayerControllerB playerControllerB = MeetsStandardPlayerCollisionConditions(other);
-        //TODO detect if it is targetPlayer or other player!
-        if ((int)State.Running == currentBehaviourStateIndex)
+        if (playerControllerB == targetPlayer)
         {
-            Debug.Log("Agent has reached the destination!");
-            SwitchToBehaviourClientRpc(5);
-            StartCoroutine(FoxyKills(targetPlayer));
+            if ((int)State.Running == currentBehaviourStateIndex)
+            {
+                Debug.Log("Agent has reached the destination!");
+                SwitchToBehaviourClientRpc(5);
+                StartCoroutine(FoxyKills(targetPlayer));
+            }
+        }
+        else
+        {
             playerControllerB.DamagePlayer(1);
         }
+        
     }
 
     public void FetchTarget()
@@ -299,7 +312,7 @@ public class FoxyAi : EnemyAI
         //Switch to jumping
         SwitchToBehaviourClientRpc(5);
         agent.speed = 0;
-        creatureAnimator.speed = 2.0f;
+        creatureAnimator.speed = 1.0f;
         movingTowardsTargetPlayer = false;
         agent.isStopped = true;
         agent.ResetPath();
