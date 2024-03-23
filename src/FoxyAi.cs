@@ -217,7 +217,7 @@ public class FoxyAi : EnemyAI
                     // Increment the current duration
                     currentDuration += Time.deltaTime;
                     transform.rotation = Quaternion.LookRotation(agent.velocity.normalized);
-                    
+                    SetDestinationToPosition(targetPlayer.transform.position);
                 }
                 else
                 {
