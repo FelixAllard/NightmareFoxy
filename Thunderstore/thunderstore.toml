@@ -23,7 +23,7 @@ source = "../bin/Release/netstandard2.1/NightmareFoxy.dll"
 target = "plugins/FoxyNightmare/"
 
 [[build.copy]]
-source = "../../FoxyFnafUnity/AssetBundles/StandaloneWindows/foxymodassets"
+source = "../../FoxyFnafUnity/AssetBundles/StandaloneWindows/foxymodasset"
 target = "plugins/FoxyNightmare/"
 
 [[build.copy]]
