@@ -125,8 +125,10 @@ public class FoxyAi : EnemyAI
                 }
                 break;
             case (int)State.Standing:
+                
                 footSpeed.Stop();
-                foxyCollider.size = new Vector3(4.531483f, 21.24057f, 5.783448f);
+                foxyCollider.size = new Vector3(foxyCollider.size.x, foxyCollider.size.y, 6.619311f);
+                foxyCollider.center = new Vector3(foxyCollider.center.x, foxyCollider.center.y, 0.8878318f);
                 creatureAnimator.speed = 1;
                 agent.isStopped = true;
                 agent.ResetPath();
@@ -134,7 +136,6 @@ public class FoxyAi : EnemyAI
                 {
                     SwitchToBehaviourClientRpc(2);
                     StartCoroutine(EyesManager(true));
-
                 }
                 break;
             case (int)State.ChargePose:
@@ -144,7 +145,6 @@ public class FoxyAi : EnemyAI
                     engine.Play(3);
                     engine.loop = true;
                 }
-                foxyCollider.size = new Vector3(4.531483f, 21.24057f, 5.783448f);
                 creatureAnimator.speed = 1;
                 agent.isStopped = true;
                 agent.ResetPath();
@@ -165,7 +165,8 @@ public class FoxyAi : EnemyAI
                 }
                 break;
             case (int)State.Running:
-                foxyCollider.size = new Vector3(4.531483f, 21.24057f, 29.73968f);
+                foxyCollider.size = new Vector3(foxyCollider.size.x, foxyCollider.size.y, 30);
+                foxyCollider.center = new Vector3(foxyCollider.center.x, foxyCollider.center.y, 12.56404f);
                 if (targetPlayer == null || targetPlayer.isPlayerDead)
                 {
                     FetchTarget();
@@ -274,6 +275,7 @@ public class FoxyAi : EnemyAI
         creatureAnimator.speed = 0;
         agent.speed = 0;
         SwitchToBehaviourClientRpc(3);
+        UnlockAllDoorClientRpc();
     }
 
     IEnumerator WaitAndGoBackUp(int x)
@@ -503,15 +505,6 @@ public class FoxyAi : EnemyAI
                 Door.UnlockDoorClientRpc();
                 Door.isLocked = false;
             }
-        }
-    }
-    [ClientRpc]
-    public void LockDoorsUnlockedClientRpc()
-    {
-        foreach (DoorLock Door in doorLocked)
-        {
-            doorLocked.Add(Door);
-            Door.isLocked = false;
         }
     }
     [ServerRpc]
