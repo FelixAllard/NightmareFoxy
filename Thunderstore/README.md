@@ -1,6 +1,7 @@
 # Nightmare Foxy - New Enemy
 ## THIS IS THE FIRST RELEASED VERSION
 This mods adds the nightmare version version of Foxy from FNAF ( Five Night At Freddy's) as a brand new enemy!
+Go on the lethal company modding server to contact me about any issues
 
 ## Foxy's Behavior
 
@@ -15,6 +16,9 @@ Foxy spawn in the map and start with the waiting behaviour. He has a rarity of 2
 
 - Model: ALES000 (https://skfb.ly/oPuvG)
 - Most animations: Mixamo (free license)
+- Image made DavHalkuma online
+- 
+If any of the people here wants something removed from the mod, please contact me on the discord server.
 
 No Money is made from this mod creation.
 If anyone wants their work removed from the mod, please contact me through my discord or fill.
