@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Security.Cryptography;
+using DunGen;
 using GameNetcodeStuff;
 using Unity.Netcode;
 using UnityEngine;
@@ -23,6 +24,12 @@ public class FoxyAi : EnemyAI
     public AudioClip deactivate;
     public AudioClip activate;
     public BoxCollider foxyCollider;
+
+    public AudioClip fallOnKnee;
+    public AudioClip fallOnBody;
+    public AudioClip destroyDoor;
+    public AudioClip train;
+    
     
     
     public Material foxEyes;
@@ -39,6 +46,7 @@ public class FoxyAi : EnemyAI
     private float duration = 3f; // Total duration of speed reduction in seconds
     private float currentDuration = 0f; // Current duration of the reduction process
     private float oldspeed;
+    public List<DoorLock> doorLocked;
     enum State {
         Down,
         Standing,
@@ -56,7 +64,14 @@ public class FoxyAi : EnemyAI
         justSwitchedBehaviour = false;
         timer = 0;
         foxyCollider.size = new Vector3(4.531483f, 21.24057f, 5.783448f);
+        agent.updateRotation = true;
     }
+
+    /*public void LateUpdate()
+    {
+        transform.rotation = Quaternion.LookRotation(agent.velocity.normalized);
+
+    }*/
 
     public override void Update()
     {
@@ -91,6 +106,8 @@ public class FoxyAi : EnemyAI
         switch (currentBehaviourStateIndex)
         {
             case (int)State.Down:
+                footSpeed.Stop();
+                engine.Stop();
                 movingTowardsTargetPlayer = false;
                 agent.isStopped = true;
                 agent.ResetPath();
@@ -102,10 +119,13 @@ public class FoxyAi : EnemyAI
                     if (generatedNumber <= 1)
                     {
                         SwitchToBehaviourClientRpc(1);
+                        
+                        engine.PlayOneShot(portalSFX);
                     }
                 }
                 break;
             case (int)State.Standing:
+                footSpeed.Stop();
                 foxyCollider.size = new Vector3(4.531483f, 21.24057f, 5.783448f);
                 creatureAnimator.speed = 1;
                 agent.isStopped = true;
@@ -121,7 +141,8 @@ public class FoxyAi : EnemyAI
                 if (!engine.isPlaying)
                 {
                     engine.clip = idle1;
-                    engine.Play();
+                    engine.Play(3);
+                    engine.loop = true;
                 }
                 foxyCollider.size = new Vector3(4.531483f, 21.24057f, 5.783448f);
                 creatureAnimator.speed = 1;
@@ -133,10 +154,11 @@ public class FoxyAi : EnemyAI
                     //Animator do the running
                     creatureAnimator.speed = 0;
                     agent.speed = 0;
+                    engine.Play();
+                    startedHowling = true;
                     if (IsHost)
                     {
-                        engine.Play();
-                        startedHowling = true;
+                        
                         StartCoroutine(CloseHunt(RandomNumberGenerator.GetInt32(3, 7)));
                     }
                     
@@ -147,6 +169,10 @@ public class FoxyAi : EnemyAI
                 if (targetPlayer == null || targetPlayer.isPlayerDead)
                 {
                     FetchTarget();
+                    if (targetPlayer == null)
+                    {
+                        SwitchToBehaviourClientRpc(0);
+                    }
                 }
                 if (
                     targetPlayer.HasLineOfSightToPosition(transform.position) 
@@ -162,8 +188,15 @@ public class FoxyAi : EnemyAI
                 }
                 movingTowardsTargetPlayer = true;
                 SetDestinationToPosition(targetPlayer.transform.position);
-                agent.speed += 0.1f;
-                creatureAnimator.speed += 0.02f;
+                if (agent.speed <=9)
+                {
+                    agent.speed += 0.1f;
+                    creatureAnimator.speed += 0.02f;
+                }
+                else
+                {
+                    creatureVoice.PlayOneShot(train);
+                }
                 BreakDoorServerRpc();
                 if (!footSpeed.isPlaying)
                 {
@@ -183,21 +216,31 @@ public class FoxyAi : EnemyAI
                     creatureAnimator.speed = newAnimatorSpeed;
                     // Increment the current duration
                     currentDuration += Time.deltaTime;
+                    transform.rotation = Quaternion.LookRotation(agent.velocity.normalized);
+                    
                 }
                 else
                 {
                     // If the duration is exceeded, set both speeds to 0
-                    agent.speed = 0f;
+                    agent.speed = 0.0000f;
                     creatureAnimator.speed = 0f;
                 }
 
-                if (agent.speed <= 0.5f)
+                if (agent.speed <= 0.1f)
                 {
+                    transform.rotation = Quaternion.LookRotation(agent.velocity.normalized);
+                    agent.ResetPath();
+                    agent.speed = 0f;
                     creatureAnimator.speed = 0.8F;
                     DoAnimationClientRpc("GotSeen");
                     StartCoroutine(EyesManager(false));
                     SwitchToBehaviourClientRpc(5);
-                    StartCoroutine(WaitAndGoBackUp(RandomNumberGenerator.GetInt32(10, 30)));
+                    footSpeed.Stop();
+                    if (IsHost)
+                    {
+                        StartCoroutine(WaitAndGoBackUp(RandomNumberGenerator.GetInt32(10, 30)));
+                    }
+                    
                 }
                 
                 break;
@@ -235,14 +278,18 @@ public class FoxyAi : EnemyAI
 
     IEnumerator WaitAndGoBackUp(int x)
     {
+        movingTowardsTargetPlayer = false;
+        agent.isStopped = true;
+        agent.ResetPath();
+        agent.speed = 0;
         yield return new WaitForSeconds(x);
         SwitchToBehaviourClientRpc(0);
     }
 
     IEnumerator EyesManager(bool opening)
     {
-        float objective = opening ?  1.0f : 0.0f;
-        float currentState = opening ?  0.0f: 1.0f;
+        float objective = opening ?  2.0f : 0.0f;
+        float currentState = opening ?  0.0f: 2.0f;
         if (opening)
         {
             engine.PlayOneShot(activate);
@@ -257,7 +304,7 @@ public class FoxyAi : EnemyAI
         float elapsedTime = 0;
         while (fixing)
         {
-            foxEyes.SetFloat("_Strenght",Mathf.Lerp(currentState,objective,elapsedTime/5));
+            foxEyes.SetFloat("_Strenght",Mathf.Lerp(currentState,objective,elapsedTime/10));
             elapsedTime += Time.deltaTime;
             if (foxEyes.GetFloat("_Strenght") == objective)
             {
@@ -269,7 +316,6 @@ public class FoxyAi : EnemyAI
 
     public override void OnCollideWithPlayer(Collider other)
     {
-        Debug.Log("Yeah, collider works!");
         PlayerControllerB playerControllerB = MeetsStandardPlayerCollisionConditions(other);
         if (playerControllerB == targetPlayer)
         {
@@ -277,12 +323,24 @@ public class FoxyAi : EnemyAI
             {
                 Debug.Log("Agent has reached the destination!");
                 SwitchToBehaviourClientRpc(5);
+                agent.speed = 0;
                 StartCoroutine(FoxyKills(targetPlayer));
             }
         }
         else
         {
-            playerControllerB.DamagePlayer(1);
+            if ((int)State.Running == currentBehaviourStateIndex)
+            {
+                playerControllerB.DamagePlayer(2);
+            }
+            else if((int)State.Seen == currentBehaviourStateIndex)
+            {
+                playerControllerB.DamagePlayer(1);
+            }
+            else
+            {
+                
+            }
         }
         
     }
@@ -294,17 +352,41 @@ public class FoxyAi : EnemyAI
         {
             if (player.isInsideFactory)
             {
-                chosableTarget.Add(player.name);
+                NavMeshPath path = new NavMeshPath();
+
+
+                if (NavMesh.CalculatePath(agent.transform.position, player.transform.position, NavMesh.AllAreas, path))
+                {
+                    chosableTarget.Add(player.name);
+                }
             }
         }
-        SetTargetPlayerClientRpc(chosableTarget[RandomNumberGenerator.GetInt32(0,chosableTarget.Count)]);
-        agent.speed = 0;
-        creatureAnimator.speed = 0;
+
+        if (chosableTarget.Count > 0)
+        {
+            SetTargetPlayerClientRpc(chosableTarget[RandomNumberGenerator.GetInt32(0,chosableTarget.Count)]);
+            agent.speed = 0;
+            creatureAnimator.speed = 0;
+        }
+        else
+        {
+            targetPlayer = null;
+        }
+        
     }
 
     public void FootStepHandler()
     {
         footStepAudio.Play();
+    }
+
+    public void FallOnKnee()
+    {
+        creatureVoice.PlayOneShot(fallOnKnee);
+    }
+    public void FallOnBody()
+    {
+        creatureVoice.PlayOneShot(fallOnBody);
     }
 
     IEnumerator FoxyKills(PlayerControllerB player)
@@ -323,6 +405,7 @@ public class FoxyAi : EnemyAI
         DoAnimationClientRpc("Kill");
         yield return new WaitForSeconds(5);
         player.movementSpeed = oldspeed;
+        engine.Stop();
     }
     IEnumerator RotatePlayerToMe(PlayerControllerB PCB)
     {
@@ -373,6 +456,8 @@ public class FoxyAi : EnemyAI
     public void KillTargetPlayerClientRpc()
     {
         targetPlayer.KillPlayer(Vector3.back,true,CauseOfDeath.Bludgeoning,2);
+        targetPlayer = null;
+        SwitchToBehaviourClientRpc(1);
     }
     
     
@@ -406,9 +491,33 @@ public class FoxyAi : EnemyAI
     {
         
     }
+
+    [ClientRpc]
+    public void UnlockAllDoorClientRpc()
+    {
+        foreach (DoorLock Door in FindObjectsOfType(typeof(DoorLock)) as DoorLock[])
+        {
+            if (Door.isLocked)
+            {
+                doorLocked.Add(Door);
+                Door.UnlockDoorClientRpc();
+                Door.isLocked = false;
+            }
+        }
+    }
+    [ClientRpc]
+    public void LockDoorsUnlockedClientRpc()
+    {
+        foreach (DoorLock Door in doorLocked)
+        {
+            doorLocked.Add(Door);
+            Door.isLocked = false;
+        }
+    }
     [ServerRpc]
     public void BreakDoorServerRpc()
     {
+        
         foreach (DoorLock Door in FindObjectsOfType(typeof(DoorLock)) as DoorLock[])
         {
             var ThisDoor = Door.transform.parent.transform.parent.transform.parent.gameObject;
@@ -432,14 +541,12 @@ public class FoxyAi : EnemyAI
             newAS.spatialBlend = 1;
             newAS.maxDistance = 60;
             newAS.rolloffMode = AudioRolloffMode.Linear;
-            newAS.volume = 3;
+            newAS.volume = 1;
             StartCoroutine(TurnOffC(rig, .12f));
             rig.AddForce(Position, ForceMode.Impulse);
-            //newAS.PlayOneShot(audioClips[3]);
+            newAS.PlayOneShot(destroyDoor);
         }
     }
-    
-    
     IEnumerator TurnOffC(Rigidbody rigidbody,float time)
     {
         rigidbody.detectCollisions = false;
