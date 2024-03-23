@@ -17,7 +17,7 @@
 
     <Configurations>Debug;Release</Configurations>
 
-    <PackageId>ExampleEnemy</PackageId>
+    <PackageId>NightmareFoxy</PackageId>
 
     <RootNamespace>ExampleEnemy</RootNamespace>
   </PropertyGroup>
@@ -28,7 +28,7 @@
   </PropertyGroup>
   <PropertyGroup>
 	  <!-- Your Thunderstore Team name. This will be used by tcli when building our Thunderstore package. -->
-    <ThunderstoreTeam>Hamunii</ThunderstoreTeam>
+    <ThunderstoreTeam>Xilef992</ThunderstoreTeam>
   </PropertyGroup>
 
   <ItemGroup>

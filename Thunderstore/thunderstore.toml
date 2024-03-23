@@ -23,7 +23,7 @@ target = "plugins/Foxy/"
 
 [[build.copy]]
 source = "../../FoxyFnafUnity/AssetBundles/StandaloneWindows/foxymodassets"
-target = "plugins/Foxy/"
+target = "plugins/FoxyNightmare/"
 
 [[build.copy]]
 source = "./CHANGELOG.md"

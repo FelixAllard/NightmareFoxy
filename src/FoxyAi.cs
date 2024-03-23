@@ -46,6 +46,7 @@ public class FoxyAi : EnemyAI
     private float duration = 3f; // Total duration of speed reduction in seconds
     private float currentDuration = 0f; // Current duration of the reduction process
     private float oldspeed;
+    private PlayerControllerB localPlayer;
     public List<DoorLock> doorLocked;
     enum State {
         Down,
@@ -65,6 +66,7 @@ public class FoxyAi : EnemyAI
         timer = 0;
         foxyCollider.size = new Vector3(4.531483f, 21.24057f, 5.783448f);
         agent.updateRotation = true;
+        localPlayer = RoundManager.Instance.playersManager.localPlayerController;
     }
 
     /*public void LateUpdate()
@@ -95,7 +97,7 @@ public class FoxyAi : EnemyAI
         {
             if (!justSwitchedBehaviour)
             {
-                generatedNumber= RandomNumberGenerator.GetInt32(1, 100);
+                generatedNumber= RandomNumberGenerator.GetInt32(1, 125);
             }
             else
             {
@@ -167,6 +169,7 @@ public class FoxyAi : EnemyAI
             case (int)State.Running:
                 foxyCollider.size = new Vector3(foxyCollider.size.x, foxyCollider.size.y, 30);
                 foxyCollider.center = new Vector3(foxyCollider.center.x, foxyCollider.center.y, 12.56404f);
+                
                 if (targetPlayer == null || targetPlayer.isPlayerDead)
                 {
                     FetchTarget();
@@ -174,6 +177,10 @@ public class FoxyAi : EnemyAI
                     {
                         SwitchToBehaviourClientRpc(0);
                     }
+                }
+                if (!targetPlayer.isInsideFactory)
+                {
+                    SwitchToBehaviourClientRpc(0);
                 }
                 if (
                     targetPlayer.HasLineOfSightToPosition(transform.position) 
@@ -333,11 +340,17 @@ public class FoxyAi : EnemyAI
         {
             if ((int)State.Running == currentBehaviourStateIndex)
             {
-                playerControllerB.DamagePlayer(2);
+                if (agent.speed > 5)
+                {
+                    playerControllerB.DamagePlayer(2);
+                }
             }
             else if((int)State.Seen == currentBehaviourStateIndex)
             {
-                playerControllerB.DamagePlayer(1);
+                if (agent.speed > 2)
+                {
+                    playerControllerB.DamagePlayer(1);
+                }
             }
             else
             {
@@ -379,7 +392,10 @@ public class FoxyAi : EnemyAI
 
     public void FootStepHandler()
     {
-        footStepAudio.Play();
+        if (localPlayer.isInsideFactory)
+        {
+            footStepAudio.Play();
+        }
     }
 
     public void FallOnKnee()
