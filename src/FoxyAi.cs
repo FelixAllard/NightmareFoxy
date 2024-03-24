@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 using DunGen;
 using GameNetcodeStuff;
+using MonoMod.Utils;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.AI;
@@ -17,28 +18,46 @@ public class FoxyAi : EnemyAI
     //TODO Long staring for hard mod 
     //TODO Instead of creating a configuration for flashlight usage, why not leave it as it is currently by default but make the flashlight accelerate the monster's deceleration?
     //Another idea would be to stop the monster when a Flashbang or Stun grenade explodes in front of him ?
-    public AudioSource footStepAudio;
+    
     public AudioSource howlingAudioSRC;
-    public AudioSource engine;
+    
     public ParticleSystem footSpeed;
     public Light eyesLight;
     public AudioClip portalSFX;
-    public AudioClip idle1;
-    public AudioClip idle2;
+    
     public AudioClip deactivate;
     public AudioClip activate;
     public BoxCollider foxyCollider;
-
+    [Header("Engine Stuff")]
+    public AudioSource engine;
+    public AudioClip idle1;
+    public AudioClip idle2;
+    [Header("Whenseen")]
     public AudioClip fallOnKnee;
     public AudioClip fallOnBody;
+    public AudioClip fallOnKneeVariant;
+    
+    
     public AudioClip destroyDoor;
     public AudioClip train;
+    [Header("Footstep")]
+    public AudioSource footStepAudio;
+    public AudioClip footStep1;
+    public AudioClip footStep2;
+    public AudioClip footStep3;
+    public AudioClip footStep4;
+
+    [Header("Kill Animation")] 
+    public AudioClip[] killAnimationSound;
+
+    public AudioClip[] howlAudioSounds;
     
     
     
+    public Transform killZone;
     public Material foxEyes;
 
-    public Transform killZone;
+    
     
     
     
@@ -64,6 +83,7 @@ public class FoxyAi : EnemyAI
     public override void Start()
     {
         base.Start();
+        duration = FoxyConfig.Instance.TIME_TO_SLOW_DOWN.Value;
         foxEyes.SetFloat("_Strenght",0);
         agent.angularSpeed = 10000f;
         justSwitchedBehaviour = false;
@@ -101,7 +121,7 @@ public class FoxyAi : EnemyAI
         {
             if (!justSwitchedBehaviour)
             {
-                generatedNumber= RandomNumberGenerator.GetInt32(1, 125);
+                generatedNumber= RandomNumberGenerator.GetInt32(1, FoxyConfig.Instance.CHANCE_NEXT_PHASE.Value);
             }
             else
             {
@@ -154,7 +174,7 @@ public class FoxyAi : EnemyAI
                 creatureAnimator.speed = 1;
                 agent.isStopped = true;
                 agent.ResetPath();
-                if (generatedNumber <= 3 && startedHowling != true)
+                if (generatedNumber <= 2 && startedHowling != true)
                 {
                     engine.clip = idle2;
                     //Animator do the running
@@ -164,8 +184,11 @@ public class FoxyAi : EnemyAI
                     startedHowling = true;
                     if (IsHost)
                     {
-                        
-                        StartCoroutine(CloseHunt(RandomNumberGenerator.GetInt32(3, 7)));
+                        StartCoroutine(CloseHunt(RandomNumberGenerator.GetInt32(
+                            FoxyConfig.Instance.MIN_AMOUNT_HOWL.Value, 
+                            FoxyConfig.Instance.MAX_AMOUNT_HOWL.Value
+                            )
+                        ));
                     }
                     
                 }
@@ -200,10 +223,10 @@ public class FoxyAi : EnemyAI
                 }
                 movingTowardsTargetPlayer = true;
                 SetDestinationToPosition(targetPlayer.transform.position);
-                if (agent.speed <=9)
+                if (agent.speed <=FoxyConfig.Instance.MAX_SPEED)
                 {
-                    agent.speed += 0.1f;
-                    creatureAnimator.speed += 0.02f;
+                    agent.speed += 0.1f*FoxyConfig.Instance.SPEED_MULTIPLIER.Value;
+                    creatureAnimator.speed += 0.02f*FoxyConfig.Instance.SPEED_MULTIPLIER.Value;
                 }
                 else
                 {
@@ -398,13 +421,34 @@ public class FoxyAi : EnemyAI
     {
         if (localPlayer.isInsideFactory)
         {
-            footStepAudio.Play();
+            switch (RandomNumberGenerator.GetInt32(0,4))
+            {
+                case 0 :
+                    footStepAudio.PlayOneShot(footStep1);
+                    break;
+                case 1:
+                    footStepAudio.PlayOneShot(footStep2);
+                    break;
+                case 2:
+                    footStepAudio.PlayOneShot(footStep3);
+                    break;
+                case 3:
+                    footStepAudio.PlayOneShot(footStep4);
+                    break;
+            }
         }
     }
 
     public void FallOnKnee()
     {
-        creatureVoice.PlayOneShot(fallOnKnee);
+        if (RandomNumberGenerator.GetInt32(0, 101)!=0)
+        {
+            creatureVoice.PlayOneShot(fallOnKnee);
+        }
+        else
+        {
+            creatureVoice.PlayOneShot(fallOnKneeVariant);
+        }
     }
     public void FallOnBody()
     {
@@ -428,6 +472,7 @@ public class FoxyAi : EnemyAI
         yield return new WaitForSeconds(5);
         player.movementSpeed = oldspeed;
         engine.Stop();
+        footSpeed.Stop();
     }
     IEnumerator RotatePlayerToMe(PlayerControllerB PCB)
     {
@@ -477,18 +522,20 @@ public class FoxyAi : EnemyAI
     [ClientRpc]
     public void KillTargetPlayerClientRpc()
     {
+        SwitchToBehaviourClientRpc(1);
         targetPlayer.KillPlayer(Vector3.back,true,CauseOfDeath.Bludgeoning,2);
         targetPlayer = null;
-        SwitchToBehaviourClientRpc(1);
     }
-    
-    
     [ClientRpc]
     public void DoAnimationClientRpc(String x)
     {
         creatureAnimator.SetTrigger(x);
     }
 
+    public void PlayKillSound(int x)
+    {
+        creatureVoice.PlayOneShot(killAnimationSound[x]);
+    }
     [ClientRpc]
     public void SetTargetPlayerClientRpc(String name)
     {
@@ -500,13 +547,24 @@ public class FoxyAi : EnemyAI
             }
         }
     }
-
-    
-    
     [ClientRpc]
     public void HowlClientRpc()
     {
-        howlingAudioSRC.Play();
+        int rndnbr = 200;
+        //int rndnbr = RandomNumberGenerator.GetInt32(0, 201);
+        if (rndnbr == 0)
+        {
+            howlingAudioSRC.PlayOneShot(howlAudioSounds[2]);
+        }
+        else if(rndnbr <=120)
+        {
+            howlingAudioSRC.PlayOneShot(howlAudioSounds[1]);         
+        }
+        else
+        {
+            howlingAudioSRC.PlayOneShot(howlAudioSounds[0]);         
+        }
+        
     }
     [ClientRpc]
     public void PlaySoundClientRpc(String x)
@@ -554,9 +612,7 @@ public class FoxyAi : EnemyAI
                 {
                     Debug.Log("The doors are not formated the right way and as such foxy may seems really stupid hitting doors " + y);
                 }
-                
             }
-            
         }
     }
     [ClientRpc]
@@ -583,5 +639,4 @@ public class FoxyAi : EnemyAI
         rigidbody.detectCollisions = true;
         Destroy(rigidbody.gameObject, 5);
     }
-
 }

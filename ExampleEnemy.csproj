@@ -7,9 +7,9 @@
     <AssemblyName>NightmareFoxy</AssemblyName>
 		<!-- This assembly description doesn't show up on Thunderstore. -->
     <!-- Configure description for Thunderstore at ./Thunderstore/thunderstore.toml -->
-    <Description>This is foxy from the FNAF crew</Description>
+    <Description>This is nightmare Foxy from the FNAF 4</Description>
 		<!-- This is the version of your plugin. This will be used by tcli when building our Thunderstore package. -->
-    <Version>1.0.2</Version>
+    <Version>1.1.2</Version>
 		<!-- This is required for BepInEx to load us properly. -->
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<!-- This allows us to use C#11 features, for the most part. -->
@@ -35,6 +35,7 @@
     <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
     <PackageReference Include="BepInEx.Core" Version="5.*" />
     <PackageReference Include="BepInEx.PluginInfoProps" Version="1.*" />
+    <PackageReference Include="Sigurd.BepInEx.CSync" Version="3.1.1" />
     <PackageReference Include="UnityEngine.Modules" Version="2022.3.9" IncludeAssets="compile" />
   </ItemGroup>
   

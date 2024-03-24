@@ -17,7 +17,7 @@ Foxy spawn in the map and start with the waiting behaviour. He has a rarity of 2
 - Model: ALES000 (https://skfb.ly/oPuvG)
 - Most animations: Mixamo (free license)
 - Image made DavHalkuma online
-- 
+- Spinmaster for the music. Huge thanks!
 If any of the people here wants something removed from the mod, please contact me on the discord server.
 
 No Money is made from this mod creation.
