@@ -13,6 +13,10 @@ namespace ExampleEnemy;
 
 public class FoxyAi : EnemyAI
 {
+    //TODO flashlight slows faster
+    //TODO Long staring for hard mod 
+    //TODO Instead of creating a configuration for flashlight usage, why not leave it as it is currently by default but make the flashlight accelerate the monster's deceleration?
+    //Another idea would be to stop the monster when a Flashbang or Stun grenade explodes in front of him ?
     public AudioSource footStepAudio;
     public AudioSource howlingAudioSRC;
     public AudioSource engine;
@@ -529,14 +533,30 @@ public class FoxyAi : EnemyAI
         
         foreach (DoorLock Door in FindObjectsOfType(typeof(DoorLock)) as DoorLock[])
         {
-            var ThisDoor = Door.transform.parent.transform.parent.transform.parent.gameObject;
-            if (!ThisDoor.GetComponent<Rigidbody>())
+            try
             {
-                if (Vector3.Distance(transform.position, ThisDoor.transform.position) <= 4f)
+                var ThisDoor = Door.transform.parent.transform.parent.transform.parent.gameObject;
+                if (!ThisDoor.GetComponent<Rigidbody>())
                 {
-                    BashDoorClientRpc(ThisDoor, (targetPlayer.transform.position - transform.position).normalized * 20);
+                    if (Vector3.Distance(transform.position, ThisDoor.transform.position) <= 4f)
+                    {
+                        BashDoorClientRpc(ThisDoor, (targetPlayer.transform.position - transform.position).normalized * 20);
+                    }
                 }
             }
+            catch (NullReferenceException e)
+            {
+                try
+                {
+                    Door.OpenDoorAsEnemyClientRpc();
+                }
+                catch (Exception y)
+                {
+                    Debug.Log("The doors are not formated the right way and as such foxy may seems really stupid hitting doors " + y);
+                }
+                
+            }
+            
         }
     }
     [ClientRpc]
