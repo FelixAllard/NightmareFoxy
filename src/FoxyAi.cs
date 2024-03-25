@@ -362,6 +362,22 @@ public class FoxyAi : EnemyAI
                 agent.speed = 0;
                 StartCoroutine(FoxyKills(targetPlayer));
             }
+            if ((int)State.Seen == currentBehaviourStateIndex)
+            {
+                if (agent.speed >= FoxyConfig.Instance.MAX_SPEED.Value / 2)
+                {
+                    Debug.Log("Agent has reached the destination. Current Speed = " + agent.speed );
+                    SwitchToBehaviourClientRpc(5);
+                    agent.speed = 0;
+                    StartCoroutine(FoxyKills(targetPlayer));
+                }
+                else if(agent.speed >= FoxyConfig.Instance.MAX_SPEED.Value/4)
+                {
+                    Debug.Log("Agent has reached the destination. Current speed to low = " + agent.speed);
+                    targetPlayer.DamagePlayer(40);
+                    agent.speed = 0;
+                }
+            }
         }
         else
         {
