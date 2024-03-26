@@ -113,7 +113,7 @@ public class FoxyAi : EnemyAI
             }
         }
     }
-    
+
     public override void DoAIInterval()
     {
         base.DoAIInterval();
@@ -121,14 +121,15 @@ public class FoxyAi : EnemyAI
         {
             if (!justSwitchedBehaviour)
             {
-                generatedNumber= RandomNumberGenerator.GetInt32(1, FoxyConfig.Instance.CHANCE_NEXT_PHASE.Value);
+                generatedNumber = RandomNumberGenerator.GetInt32(1, FoxyConfig.Instance.CHANCE_NEXT_PHASE.Value);
             }
             else
             {
                 generatedNumber = 100;
             }
-            
+
         }
+
         switch (currentBehaviourStateIndex)
         {
             case (int)State.Down:
@@ -145,13 +146,14 @@ public class FoxyAi : EnemyAI
                     if (generatedNumber <= 1)
                     {
                         SwitchToBehaviourClientRpc(1);
-                        
+
                         engine.PlayOneShot(portalSFX);
                     }
                 }
+
                 break;
             case (int)State.Standing:
-                
+
                 footSpeed.Stop();
                 foxyCollider.size = new Vector3(foxyCollider.size.x, foxyCollider.size.y, 6.619311f);
                 foxyCollider.center = new Vector3(foxyCollider.center.x, foxyCollider.center.y, 0.8878318f);
@@ -163,6 +165,7 @@ public class FoxyAi : EnemyAI
                     SwitchToBehaviourClientRpc(2);
                     StartCoroutine(EyesManager(true));
                 }
+
                 break;
             case (int)State.ChargePose:
                 if (!engine.isPlaying)
@@ -171,6 +174,7 @@ public class FoxyAi : EnemyAI
                     engine.Play(3);
                     engine.loop = true;
                 }
+
                 creatureAnimator.speed = 1;
                 agent.isStopped = true;
                 agent.ResetPath();
@@ -185,21 +189,24 @@ public class FoxyAi : EnemyAI
                     if (IsHost)
                     {
                         StartCoroutine(CloseHunt(RandomNumberGenerator.GetInt32(
-                            FoxyConfig.Instance.MIN_AMOUNT_HOWL.Value, 
-                            FoxyConfig.Instance.MAX_AMOUNT_HOWL.Value
+                                FoxyConfig.Instance.MIN_AMOUNT_HOWL.Value,
+                                FoxyConfig.Instance.MAX_AMOUNT_HOWL.Value
                             )
                         ));
                     }
-                    
+
                 }
+
                 break;
             case (int)State.Running:
                 foxyCollider.size = new Vector3(foxyCollider.size.x, foxyCollider.size.y, 30);
                 foxyCollider.center = new Vector3(foxyCollider.center.x, foxyCollider.center.y, 12.56404f);
-                
-                if (targetPlayer == null || targetPlayer.isPlayerDead)
-                {
-                    FetchTarget();
+
+                if (targetPlayer == null || targetPlayer.isPlayerDead || !targetPlayer.isInsideFactory) {
+                    if (IsHost)
+                    {
+                        FetchTarget();
+                    }
                     if (targetPlayer == null)
                     {
                         SwitchToBehaviourClientRpc(0);
@@ -364,17 +371,17 @@ public class FoxyAi : EnemyAI
             }
             if ((int)State.Seen == currentBehaviourStateIndex)
             {
-                if (agent.speed >= FoxyConfig.Instance.MAX_SPEED.Value / 2)
+                if (agent.speed >= FoxyConfig.Instance.MAX_SPEED.Value / (100/ FoxyConfig.Instance.SPEED_FOXY_KILLS.Value))
                 {
                     Debug.Log("Agent has reached the destination. Current Speed = " + agent.speed );
                     SwitchToBehaviourClientRpc(5);
                     agent.speed = 0;
                     StartCoroutine(FoxyKills(targetPlayer));
                 }
-                else if(agent.speed >= FoxyConfig.Instance.MAX_SPEED.Value/4)
+                else if(agent.speed >= FoxyConfig.Instance.MAX_SPEED.Value/ (100/ FoxyConfig.Instance.SPEED_FOXY_DAMAGES.Value))
                 {
                     Debug.Log("Agent has reached the destination. Current speed to low = " + agent.speed);
-                    targetPlayer.DamagePlayer(40);
+                    targetPlayer.DamagePlayer(FoxyConfig.Instance.FOXY_DAMAGES.Value);
                     agent.speed = 0;
                 }
             }
@@ -429,6 +436,7 @@ public class FoxyAi : EnemyAI
         else
         {
             targetPlayer = null;
+            SetTargetPlayerClientRpc("NoneCode1234567890");
         }
         
     }
@@ -555,6 +563,10 @@ public class FoxyAi : EnemyAI
     [ClientRpc]
     public void SetTargetPlayerClientRpc(String name)
     {
+        if (name == "NoneCode1234567890")
+        {
+            targetPlayer = null;
+        }
         foreach (var player in RoundManager.Instance.playersManager.allPlayerScripts)
         {
             if (player.name == name)
@@ -580,11 +592,6 @@ public class FoxyAi : EnemyAI
         {
             howlingAudioSRC.PlayOneShot(howlAudioSounds[0]);         
         }
-        
-    }
-    [ClientRpc]
-    public void PlaySoundClientRpc(String x)
-    {
         
     }
 

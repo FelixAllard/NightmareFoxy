@@ -14,6 +14,9 @@ public class FoxyConfig : SyncedConfig<FoxyConfig>
     [DataMember] public SyncedEntry<int> RARITY { get; private set; } 
     [DataMember] public SyncedEntry<int> MIN_AMOUNT_HOWL { get; private set; } 
     [DataMember] public SyncedEntry<int> MAX_AMOUNT_HOWL { get; private set; } 
+    [DataMember] public SyncedEntry<float> SPEED_FOXY_KILLS { get; private set; } 
+    [DataMember] public SyncedEntry<float> SPEED_FOXY_DAMAGES { get; private set; } 
+    [DataMember] public SyncedEntry<int> FOXY_DAMAGES { get; private set; } 
     
 
     
@@ -40,6 +43,15 @@ public class FoxyConfig : SyncedConfig<FoxyConfig>
         );
         MAX_AMOUNT_HOWL = cfg.BindSyncedEntry("Audio", "Maximum amount of Howl", 7,
             "This is for the howls before he starts chasing you"
+        );
+        SPEED_FOXY_KILLS = cfg.BindSyncedEntry("Kill Behaviour", "Seen Amount of speed needed to kill", 50f,
+            "This is for the howls before he starts chasing you. DON'T ENTER 0, ENTER 1 INSTEAD. This is a percentage relative to Foxy's Max speed"
+        );
+        SPEED_FOXY_DAMAGES = cfg.BindSyncedEntry("Kill Behaviour", "Seen Amount of speed needed to deal damage", 25f,
+            "This is for the howls before he starts chasing you. DON'T ENTER 0, ENTER 1 instead. This is a percentage relative to Foxy's Max speed"
+        );
+        FOXY_DAMAGES = cfg.BindSyncedEntry("Kill Behaviour", "Foxy Damage", 40,
+            "Amount of damage Foxy does to you when he doesn't have the speed to kill you"
         );
 
 
