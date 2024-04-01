@@ -10,7 +10,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.TextCore.Text;
 
-namespace ExampleEnemy;
+namespace NightmareFoxyLC;
 
 public class FoxyAi : EnemyAI
 {
@@ -91,6 +91,7 @@ public class FoxyAi : EnemyAI
         foxyCollider.size = new Vector3(4.531483f, 21.24057f, 5.783448f);
         agent.updateRotation = true;
         localPlayer = RoundManager.Instance.playersManager.localPlayerController;
+        howlingAudioSRC.volume = FoxyConfig.Instance.HOWLING_STRENGHT;
     }
 
     /*public void LateUpdate()
@@ -209,7 +210,9 @@ public class FoxyAi : EnemyAI
                     }
                     if (targetPlayer == null)
                     {
-                        SwitchToBehaviourClientRpc(0);
+                        SwitchToBehaviourClientRpc(4);
+                        StartCoroutine(EyesManager(false));
+                        break;
                     }
                 }
                 if (!targetPlayer.isInsideFactory)
@@ -326,6 +329,7 @@ public class FoxyAi : EnemyAI
         agent.ResetPath();
         agent.speed = 0;
         yield return new WaitForSeconds(x);
+        DoAnimationClientRpc("FallDown");
         SwitchToBehaviourClientRpc(0);
     }
 
@@ -498,17 +502,31 @@ public class FoxyAi : EnemyAI
         engine.Stop();
         footSpeed.Stop();
     }
+
+    private bool stopLooking;
     IEnumerator RotatePlayerToMe(PlayerControllerB PCB)
     {
+        stopLooking = false;
+        StartCoroutine(StopAfterThreeSeconds(PCB));
         if (PCB)
         {
             Vector3 Position = transform.position - PCB.gameObject.transform.position;
-            while (PCB.health != 0)
+            while (PCB.health != 0 && !PCB.isPlayerDead && !stopLooking)
             {
                 PlayerSmoothLookAt(Position,PCB);
                 yield return null;
             }
         }
+
+        stopLooking = false;
+    }
+
+    IEnumerator StopAfterThreeSeconds(PlayerControllerB PCB)
+    {
+        yield return new WaitForSeconds(3f);
+        stopLooking = true;
+        yield return new WaitForSeconds(1f);
+        stopLooking = false;
     }
     void PlayerSmoothLookAt(Vector3 newDirection, PlayerControllerB PCB)
     {
@@ -580,7 +598,7 @@ public class FoxyAi : EnemyAI
     {
         int rndnbr = 200;
         //int rndnbr = RandomNumberGenerator.GetInt32(0, 201);
-        if (rndnbr == 0)
+        /*if (rndnbr == 0)
         {
             howlingAudioSRC.PlayOneShot(howlAudioSounds[2]);
         }
@@ -591,7 +609,8 @@ public class FoxyAi : EnemyAI
         else
         {
             howlingAudioSRC.PlayOneShot(howlAudioSounds[0]);         
-        }
+        }*/
+        howlingAudioSRC.Play();
         
     }
 
@@ -633,7 +652,7 @@ public class FoxyAi : EnemyAI
                 }
                 catch (Exception y)
                 {
-                    Debug.Log("The doors are not formated the right way and as such foxy may seems really stupid hitting doors " + y);
+                    Debug.Log("The doors are not formatted the right way and as such foxy may seems really stupid hitting doors " + y);
                 }
             }
         }

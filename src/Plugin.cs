@@ -5,7 +5,7 @@ using LethalLib.Modules;
 using BepInEx.Logging;
 using System.IO;
 
-namespace ExampleEnemy {
+namespace NightmareFoxyLC {
     [BepInDependency("com.sigurd.csync")] 
     [BepInPlugin(ModGUID, PluginInfo.PLUGIN_NAME, PluginInfo.PLUGIN_VERSION)]
     [BepInDependency(LethalLib.Plugin.ModGUID)] 

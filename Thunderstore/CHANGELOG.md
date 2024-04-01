@@ -21,3 +21,19 @@ EARLY ACCESS
 - Added configurations for Foxy's kill percentage
 - Added configurations for Foxy's damage percentage
 - Added configurations for Foxy's damage dealing
+
+## 1.1.5
+- Fixed a bug related to Foxy's target not changing resulting in issues
+- Fixed a bug related to Foxy never stoping running after his first run
+## 1.1.6
+- Changed the namespace of the solution
+- Remade the unity project
+- Blocked a missing target problem ( Normaly, tell me if it doesn't work in multiplayer please)
+- Made the eyes purple by accident :D, gonna put them back red tmr normaly
+- Made the animations more consistent.
+- Made a setting for the loudness of the howling
+- Adjusted the speed a little
+- Fixed some target player problem. Annoying stuff
+
+## TODO for 1.1.7
+- Make footstep less earable from afar

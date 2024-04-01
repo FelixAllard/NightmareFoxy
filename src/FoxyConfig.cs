@@ -3,7 +3,7 @@ using BepInEx.Configuration;
 using CSync.Lib;
 using CSync.Util;
 
-namespace ExampleEnemy;
+namespace NightmareFoxyLC;
 
 public class FoxyConfig : SyncedConfig<FoxyConfig>
 {
@@ -17,6 +17,8 @@ public class FoxyConfig : SyncedConfig<FoxyConfig>
     [DataMember] public SyncedEntry<float> SPEED_FOXY_KILLS { get; private set; } 
     [DataMember] public SyncedEntry<float> SPEED_FOXY_DAMAGES { get; private set; } 
     [DataMember] public SyncedEntry<int> FOXY_DAMAGES { get; private set; } 
+    
+    [DataMember] public SyncedEntry<float> HOWLING_STRENGHT { get; private set; } 
     
 
     
@@ -53,6 +55,11 @@ public class FoxyConfig : SyncedConfig<FoxyConfig>
         FOXY_DAMAGES = cfg.BindSyncedEntry("Kill Behaviour", "Foxy Damage", 40,
             "Amount of damage Foxy does to you when he doesn't have the speed to kill you"
         );
+        
+        HOWLING_STRENGHT = cfg.BindSyncedEntry("Audio", "How loud are the screaming before he runs!", 7f,
+            "A value usually betweeen 0 and 1 where 0 is no volume and 1 is max volume. It is possible to go over 1, but it will be really loud"
+        );
+
 
 
         
