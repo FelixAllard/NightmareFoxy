@@ -22,7 +22,7 @@ public class FoxyConfig : SyncedConfig<FoxyConfig>
     
 
     
-    public FoxyConfig(ConfigFile cfg) : base("NightmareFoxy")
+    public FoxyConfig(ConfigFile cfg) : base("Xilef992.NightmareFoxy")
     {
         ConfigManager.Register(this); 
         MAX_SPEED = cfg.BindSyncedEntry("Difficulty", "Maximum speed", 10f,
@@ -59,10 +59,5 @@ public class FoxyConfig : SyncedConfig<FoxyConfig>
         HOWLING_STRENGHT = cfg.BindSyncedEntry("Audio", "How loud are the screaming before he runs!", 7f,
             "A value usually betweeen 0 and 1 where 0 is no volume and 1 is max volume. It is possible to go over 1, but it will be really loud"
         );
-
-
-
-        
-        
     }
 }

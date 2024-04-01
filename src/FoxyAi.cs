@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using DunGen;
 using GameNetcodeStuff;
 using MonoMod.Utils;
+using NightmareFoxyLC.Configurations;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.AI;
@@ -83,7 +84,7 @@ public class FoxyAi : EnemyAI
     public override void Start()
     {
         base.Start();
-        duration = FoxyConfig.Instance.TIME_TO_SLOW_DOWN.Value;
+        duration = Config.Instance.TIME_TO_SLOW_DOWN.Value;
         foxEyes.SetFloat("_Strenght",0);
         agent.angularSpeed = 10000f;
         justSwitchedBehaviour = false;
@@ -91,7 +92,7 @@ public class FoxyAi : EnemyAI
         foxyCollider.size = new Vector3(4.531483f, 21.24057f, 5.783448f);
         agent.updateRotation = true;
         localPlayer = RoundManager.Instance.playersManager.localPlayerController;
-        howlingAudioSRC.volume = FoxyConfig.Instance.HOWLING_STRENGHT;
+        howlingAudioSRC.volume = Config.Instance.HOWLING_STRENGHT.Value;
     }
 
     /*public void LateUpdate()
@@ -122,7 +123,7 @@ public class FoxyAi : EnemyAI
         {
             if (!justSwitchedBehaviour)
             {
-                generatedNumber = RandomNumberGenerator.GetInt32(1, FoxyConfig.Instance.CHANCE_NEXT_PHASE.Value);
+                generatedNumber = RandomNumberGenerator.GetInt32(1, Config.Instance.CHANCE_NEXT_PHASE.Value);
             }
             else
             {
@@ -190,8 +191,8 @@ public class FoxyAi : EnemyAI
                     if (IsHost)
                     {
                         StartCoroutine(CloseHunt(RandomNumberGenerator.GetInt32(
-                                FoxyConfig.Instance.MIN_AMOUNT_HOWL.Value,
-                                FoxyConfig.Instance.MAX_AMOUNT_HOWL.Value
+                                Config.Instance.MIN_AMOUNT_HOWL.Value,
+                                Config.Instance.MAX_AMOUNT_HOWL.Value
                             )
                         ));
                     }
@@ -233,10 +234,10 @@ public class FoxyAi : EnemyAI
                 }
                 movingTowardsTargetPlayer = true;
                 SetDestinationToPosition(targetPlayer.transform.position);
-                if (agent.speed <=FoxyConfig.Instance.MAX_SPEED)
+                if (agent.speed <=Config.Instance.MAX_SPEED.Value)
                 {
-                    agent.speed += 0.1f*FoxyConfig.Instance.SPEED_MULTIPLIER.Value;
-                    creatureAnimator.speed += 0.02f*FoxyConfig.Instance.SPEED_MULTIPLIER.Value;
+                    agent.speed += 0.1f*Config.Instance.SPEED_MULTIPLIER.Value;
+                    creatureAnimator.speed += 0.02f*Config.Instance.SPEED_MULTIPLIER.Value;
                 }
                 else
                 {
@@ -375,17 +376,17 @@ public class FoxyAi : EnemyAI
             }
             if ((int)State.Seen == currentBehaviourStateIndex)
             {
-                if (agent.speed >= FoxyConfig.Instance.MAX_SPEED.Value / (100/ FoxyConfig.Instance.SPEED_FOXY_KILLS.Value))
+                if (agent.speed >= Config.Instance.MAX_SPEED.Value / (100/ Config.Instance.SPEED_FOXY_KILLS.Value))
                 {
                     Debug.Log("Agent has reached the destination. Current Speed = " + agent.speed );
                     SwitchToBehaviourClientRpc(5);
                     agent.speed = 0;
                     StartCoroutine(FoxyKills(targetPlayer));
                 }
-                else if(agent.speed >= FoxyConfig.Instance.MAX_SPEED.Value/ (100/ FoxyConfig.Instance.SPEED_FOXY_DAMAGES.Value))
+                else if(agent.speed >= Config.Instance.MAX_SPEED.Value/ (100/ Config.Instance.SPEED_FOXY_DAMAGES.Value))
                 {
                     Debug.Log("Agent has reached the destination. Current speed to low = " + agent.speed);
-                    targetPlayer.DamagePlayer(FoxyConfig.Instance.FOXY_DAMAGES.Value);
+                    targetPlayer.DamagePlayer(Config.Instance.FOXY_DAMAGES.Value);
                     agent.speed = 0;
                 }
             }
