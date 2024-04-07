@@ -62,7 +62,7 @@ public class Config : SyncedInstance<Config>
         if (!IsClient) return;
 
         using FastBufferWriter stream = new(IntSize, Allocator.Temp);
-        MessageManager.SendNamedMessage("ModName_OnRequestConfigSync", 0uL, stream);
+        MessageManager.SendNamedMessage("Xilef992NightmareFoxy_OnRequestConfigSync", 0uL, stream);
     }
     public static void OnRequestSync(ulong clientId, FastBufferReader _) {
         if (!IsHost) return;
@@ -78,7 +78,7 @@ public class Config : SyncedInstance<Config>
             stream.WriteValueSafe(in value, default);
             stream.WriteBytesSafe(array);
 
-            MessageManager.SendNamedMessage("ModName_OnReceiveConfigSync", clientId, stream);
+            MessageManager.SendNamedMessage("Xilef992NightmareFoxys_OnReceiveConfigSync", clientId, stream);
         } catch(Exception e) {
             Plugin.Logger.LogInfo($"Error occurred syncing config with client: {clientId}\n{e}");
         }

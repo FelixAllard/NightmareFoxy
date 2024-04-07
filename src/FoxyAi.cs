@@ -303,7 +303,7 @@ public class FoxyAi : EnemyAI
                 break;
         }
     }
-
+    
     IEnumerator CloseHunt(int howling)
     {
         
@@ -468,6 +468,12 @@ public class FoxyAi : EnemyAI
         }
     }
 
+    /*
+     *<summary>
+     *  This function must be called bu the animation when the knee hit the ground
+     * </summary>
+     * 
+     */
     public void FallOnKnee()
     {
         if (RandomNumberGenerator.GetInt32(0, 101)!=0)
@@ -518,8 +524,6 @@ public class FoxyAi : EnemyAI
                 yield return null;
             }
         }
-
-        stopLooking = false;
     }
 
     IEnumerator StopAfterThreeSeconds(PlayerControllerB PCB)
