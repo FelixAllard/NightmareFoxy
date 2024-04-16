@@ -1,7 +1,6 @@
 # Nightmare Foxy - New Enemy
-## THIS IS THE FIRST RELEASED VERSION
 This mods adds the nightmare version version of Foxy from FNAF ( Five Night At Freddy's) as a brand new enemy!
-Go on the lethal company modding server to contact me about any issues
+Go on the lethal company modding server to contact me about any issues. 
 
 ## Foxy's Behavior
 

@@ -35,5 +35,15 @@ EARLY ACCESS
 - Adjusted the speed a little
 - Fixed some target player problem. Annoying stuff
 
-## TODO for 1.1.7
-- Make footstep less earable from afar
+## 1.1.7
+- Remade the configuration for it not to use CSync anymore
+- Removed CSync Sigurd as a dependency!
+
+## 1.1.8 - V50 Update
+- Added LethalBestiary dependency for my mod to work in V50!
+- Removed LethalLib as a dependency for my new API can replace it
+
+## 1.1.9
+- Added settings for flashlight
+- Added Settings for having to constantly look at him for him to completely shut down
+- Tried to make the texture better

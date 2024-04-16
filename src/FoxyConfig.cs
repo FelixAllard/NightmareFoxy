@@ -19,7 +19,7 @@ public class FoxyConfig : SyncedConfig<FoxyConfig>
     [DataMember] public SyncedEntry<int> FOXY_DAMAGES { get; private set; } 
     
     [DataMember] public SyncedEntry<float> HOWLING_STRENGHT { get; private set; } 
-    
+    [DataMember] public SyncedEntry<float> FLASHLIGHT_SLOW_DOWN_MODIFIER { get; private set; } 
 
     
     public FoxyConfig(ConfigFile cfg) : base("Xilef992.NightmareFoxy")
@@ -58,6 +58,9 @@ public class FoxyConfig : SyncedConfig<FoxyConfig>
         
         HOWLING_STRENGHT = cfg.BindSyncedEntry("Audio", "How loud are the screaming before he runs!", 7f,
             "A value usually betweeen 0 and 1 where 0 is no volume and 1 is max volume. It is possible to go over 1, but it will be really loud"
+        );
+        FLASHLIGHT_SLOW_DOWN_MODIFIE = cfg.BindSyncedEntry("Difficulty", "Sleep deceleration when Foxy is flshed At", 3f,
+            "Affects how fast Foxy slows down when a flashlight is pointed at him. The chosen value is direcly multiplied with his deceleration"
         );
     }
 }

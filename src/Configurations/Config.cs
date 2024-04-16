@@ -19,6 +19,8 @@ public class Config : SyncedInstance<Config>
     public ConfigEntry<float> SPEED_FOXY_DAMAGES { get; private set; } 
     public ConfigEntry<int> FOXY_DAMAGES { get; private set; } 
     public ConfigEntry<float> HOWLING_STRENGHT { get; private set; } 
+    public ConfigEntry<float> FLASHLIGHT_SLOW_DOWN_MODIFIER { get; private set; } 
+    public ConfigEntry<bool> ACTIVATE_CONSTANT_LOOK { get; private set; } 
     
     public Config(ConfigFile cfg)
     {
@@ -56,6 +58,13 @@ public class Config : SyncedInstance<Config>
         
         HOWLING_STRENGHT = cfg.Bind("Audio", "How loud are the screaming before he runs!", 7f,
             "A value usually betweeen 0 and 1 where 0 is no volume and 1 is max volume. It is possible to go over 1, but it will be really loud"
+        );
+        FLASHLIGHT_SLOW_DOWN_MODIFIER = cfg.Bind("Difficulty", "Sleep deceleration when Foxy is flshed At", 3f,
+            "Affects how fast Foxy slows down when a flashlight is pointed at him. The chosen value is direcly multiplied with his deceleration"
+        );
+        
+        ACTIVATE_CONSTANT_LOOK = cfg.Bind("Difficulty", "Do you have to constantly look at foxy for him to slow down?", false,
+            "If this value is true, foxy will re-accelerate when not looked at even if you took a glimpse of him earlier. Putting it to false, the second foxy is looked at, he will start decelerating even if you stop looking at him"
         );
     }
     public static void RequestSync() {

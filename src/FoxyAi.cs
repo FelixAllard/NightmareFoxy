@@ -248,10 +248,13 @@ public class FoxyAi : EnemyAI
                 {
                     footSpeed.Play();
                 }
+                
+                currentDuration = 0f;
                 break;
             case (int)State.Seen:
                 if (currentDuration < duration)
                 {
+                    
                     // Calculate the interpolation parameter based on the current duration
                     float t = currentDuration / duration;
                     // Calculate the new speed values using Mathf.Lerp
@@ -261,9 +264,49 @@ public class FoxyAi : EnemyAI
                     agent.speed = newAgentSpeed;
                     creatureAnimator.speed = newAnimatorSpeed;
                     // Increment the current duration
-                    currentDuration += Time.deltaTime;
+                    
                     transform.rotation = Quaternion.LookRotation(agent.velocity.normalized);
-                    SetDestinationToPosition(targetPlayer.transform.position);
+                    if (CheckIfFlashedAt())
+                    {
+                        //If FlashedAt
+                        currentDuration += Time.deltaTime * Config.Instance.FLASHLIGHT_SLOW_DOWN_MODIFIER.Value;
+                        if (agent.speed >= 0.3)
+                        {
+                            agent.speed -= 0.1f *Config.Instance.FLASHLIGHT_SLOW_DOWN_MODIFIER.Value;
+                        }
+                    }
+                    else
+                    {
+                        if (targetPlayer != null)
+                        {
+                            SetDestinationToPosition(targetPlayer.transform.position);
+                            if (Config.Instance.ACTIVATE_CONSTANT_LOOK.Value)
+                            {
+                                if(!((targetPlayer.HasLineOfSightToPosition(transform.position)
+                                      || !targetPlayer.isInsideFactory
+                                      || !targetPlayer.isPlayerControlled
+                                      || targetPlayer.isPlayerDead
+                                       )))
+                                {
+                                    SwitchToBehaviourWithoutEnterStateClientRpc((int)State.Running);
+                                    StartCoroutine(EyesManager(true));
+                                    break;
+                                }
+                                else
+                                {
+                                    currentDuration += Time.deltaTime;
+                                }
+                            }
+                            else
+                            {
+                                currentDuration += Time.deltaTime;
+                            }
+                        }
+                        else
+                        {
+                            currentDuration += Time.deltaTime; 
+                        }
+                    }
                 }
                 else
                 {
@@ -679,11 +722,39 @@ public class FoxyAi : EnemyAI
             newAS.PlayOneShot(destroyDoor);
         }
     }
+
+    private bool CheckIfFlashedAt()
+    {
+        foreach (var player in RoundManager.Instance.playersManager.allPlayerScripts)
+        {
+            if (!player.HasLineOfSightToPosition(transform.position)) continue;
+            foreach (var item in player.ItemSlots)
+            {
+                if (item != null)
+                    if (item.gameObject.GetComponent<FlashlightItem>() != null)
+                        if (item.gameObject.GetComponent<FlashlightItem>().isBeingUsed)
+                            if (Vector3.Distance(player.transform.position, transform.position) < 6f)
+                            {
+                                Debug.Log("FlashedAt");
+                                return true;
+                            }
+                                
+            }
+        }
+        return false;
+    }
     IEnumerator TurnOffC(Rigidbody rigidbody,float time)
     {
         rigidbody.detectCollisions = false;
         yield return new WaitForSeconds(time);
         rigidbody.detectCollisions = true;
         Destroy(rigidbody.gameObject, 5);
+    }
+    [ClientRpc]
+    public void SwitchToBehaviourWithoutEnterStateClientRpc(int x)
+    {
+        this.previousBehaviourStateIndex = this.currentBehaviourStateIndex;
+        this.currentBehaviourStateIndex = x;
+        this.currentBehaviourState = this.enemyBehaviourStates[x];
     }
 }

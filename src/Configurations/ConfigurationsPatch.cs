@@ -9,14 +9,14 @@ public static class ConfigurationsPatch
     [HarmonyPatch(typeof(PlayerControllerB), "ConnectClientToPlayerObject")]
     public static void InitializeLocalPlayer() {
         if (RoundManager.Instance.IsHost) {
-            Config.MessageManager.RegisterNamedMessageHandler("ModName_OnRequestConfigSync", Config.OnRequestSync);
+            Config.MessageManager.RegisterNamedMessageHandler("FoxyNightmare_OnRequestConfigSync", Config.OnRequestSync);
             Config.Synced = true;
 
             return;
         }
 
         Config.Synced = false;
-        Config.MessageManager.RegisterNamedMessageHandler("ModName_OnReceiveConfigSync", Config.OnReceiveSync);
+        Config.MessageManager.RegisterNamedMessageHandler("FoxyNightmare_OnReceiveConfigSync", Config.OnReceiveSync);
         Config.RequestSync();
     }
     [HarmonyPostfix]
