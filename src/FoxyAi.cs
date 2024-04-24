@@ -408,6 +408,10 @@ public class FoxyAi : EnemyAI
     public override void OnCollideWithPlayer(Collider other)
     {
         PlayerControllerB playerControllerB = MeetsStandardPlayerCollisionConditions(other);
+        if (playerControllerB == null || !playerControllerB.isPlayerControlled)
+        {
+            return;
+        }
         if (playerControllerB == targetPlayer)
         {
             if ((int)State.Running == currentBehaviourStateIndex)

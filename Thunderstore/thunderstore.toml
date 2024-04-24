@@ -5,7 +5,7 @@ schemaVersion = "0.0.1"
 repository = "https://thunderstore.io"
 
 [package]
-description = "Nightmare Foxy as a new Enemy ( V50 Compatible )"
+description = "Nightmare Foxy as a new Enemy!"
 websiteUrl = "https://github.com/FelixAllard/NightmareFoxy"
 containsNsfwContent = false
 [package.dependencies]

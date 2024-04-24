@@ -34,7 +34,7 @@ public class Config : SyncedInstance<Config>
         CHANCE_NEXT_PHASE = cfg.Bind("Difficulty", "His chance of going to the next phase", 125,
             "Every 0.2 seconds, foxy will generate a random number from 0-this number. If this number is 1, he will go to the next phase. There are four inactive state and 1 state where he chases you"
         );
-        SPEED_MULTIPLIER = cfg.Bind("Difficulty", "Speed multiplier", 1f,
+        SPEED_MULTIPLIER = cfg.Bind("Difficulty", "Speed multiplier", 1.5f,
             "Every 0.2 seconds, FOxy will add 0.01 to his speed which leads to him being faster and faster. This number multiplies this 0.01 directly to whatever number you want!"
         );
         TIME_TO_SLOW_DOWN = cfg.Bind("Difficulty", "Slow down speed", 3f,

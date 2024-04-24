@@ -47,3 +47,5 @@ EARLY ACCESS
 - Added settings for flashlight
 - Added Settings for having to constantly look at him for him to completely shut down
 - Tried to make the texture better
+## 1.1.10
+- Fixed a small collision bug [FOUND BY : mouse thing]
